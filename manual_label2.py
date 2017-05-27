@@ -1,50 +1,11 @@
 import io
-
-from google.cloud import vision
-from google.oauth2 import service_account
+import csv
 
 import tkinter as tk
 from PIL import ImageTk, Image, ImageDraw
 
-vision_client = vision.Client(
-    project='Oing',
-    credentials=service_account.Credentials.from_service_account_file(
-        'Oing-b491692df533.json'
-    )
-)
-
 FACE_DETECTION_MAX_FACES = 32
 GUI = None
-
-def detect_faces(path):
-    """Detects faces in an image."""
-
-    with io.open(path, 'rb') as image_file:
-        content = image_file.read()
-
-    image = vision_client.image(content=content)
-
-    faces = image.detect_faces(limit=FACE_DETECTION_MAX_FACES)
-    print('Faces:')
-
-    angles = []
-    bounds = []
-
-    for face in faces:
-        # print('pan: {}'.format(face.angles.pan))
-        # print('roll: {}'.format(face.angles.roll))
-        # print('tilt: {}'.format(face.angles.tilt))
-        angle = {}
-        angle['pan'] = face.angles.pan
-        angle['roll'] = face.angles.roll
-        angle['tilt'] = face.angles.tilt
-        bound = [(bound.x_coordinate,bound.y_coordinate) for bound in face.bounds.vertices]
-        angles.append(angle)
-        bounds.append(bound)
-
-        print('face bounds: ',bound)
-
-    return bounds, angles
 
 class LabelingGUI:
 	def __init__(self):
@@ -85,7 +46,7 @@ class LabelingGUI:
 		self.face_tilt = tk.Label(self.frame2, pady=8, font=(None,12))
 		self.face_tilt.pack(side=tk.TOP)
 
-	def start(self, path, start_file, end_file):
+	def start(self, csv_file, index=0):
 		self.path = path
 		self.current_file = start_file
 		self.end_file = end_file
@@ -153,16 +114,11 @@ def onKeyPress(event):
 	if pressed_char=='1':
 		GUI.nextFace()
 
-
-# def main():
-	
-
-def main2():
+def main():
 	global GUI
-	dir_root = 'data_gopro/filtered/'
-	dir_class = '170524_1030_101/'
-	path = dir_root + dir_class
+	csv_file = 'detection_0900.csv'
 	GUI = LabelingGUI()
 	GUI.start(path, 16102, 16103)
+
 if __name__ == '__main__':
-    main2()
+    main()
