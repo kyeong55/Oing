@@ -98,7 +98,8 @@ class LabelingGUI:
         self.showFace()
 
     def showFace(self):
-        if self.index >= self.face_num
+        if self.index >= self.face_num:
+            return
         row = self.detection[self.index]
         if self.img_file != row[1]:
             self.img_file = row[1]
@@ -160,8 +161,9 @@ def onKeyPress(event):
         # TODO : quit
         GUI.root.quit()
     if pressed_char == 'z':
-        GUI.data.pop(len(GUI.data)-1)
-        GUI.prevFace()
+        if len(GUI.data) > 0:
+            GUI.data.pop(len(GUI.data)-1)
+            GUI.prevFace()
 
 def main():
     start_time = time.time()
