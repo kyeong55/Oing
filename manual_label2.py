@@ -12,8 +12,8 @@ GUI = None
 
 class LabelingGUI:
     def __init__(self):
-        self.ori_img_w = 1200
-        self.ori_img_h = 900
+        self.ori_img_w = 800
+        self.ori_img_h = 600
         self.ori_frag_w = self.ori_img_w + 100
         self.ori_frag_h = self.ori_img_h + 100
 
@@ -98,6 +98,7 @@ class LabelingGUI:
         self.showFace()
 
     def showFace(self):
+        if self.index >= self.face_num
         row = self.detection[self.index]
         if self.img_file != row[1]:
             self.img_file = row[1]
@@ -165,9 +166,10 @@ def onKeyPress(event):
 def main():
     start_time = time.time()
     global GUI
-    path = 'data_gopro/filtered/'
-    csv_file_read = 'detection_0900.csv'
-    csv_file_write = 'detection_0900_labeled.csv'
+    path = 'data/'
+    file_name = 'detection_0900_tg'
+    csv_file_read = file_name + '.csv'
+    csv_file_write = file_name + '_labeled.csv'
     GUI = LabelingGUI()
     GUI.start(path,csv_file_read,csv_file_write)
     GUI.saveData()
