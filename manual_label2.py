@@ -1,6 +1,7 @@
 # import io
 import csv 
 import sys
+import os
 
 import tkinter as tk
 from PIL import ImageTk, Image, ImageDraw
@@ -48,12 +49,24 @@ class LabelingGUI:
         self.face_tilt.pack(side=tk.TOP)
         
     def start(self, path, csv_file_read, csv_file_write, index=0):
-        self.index = 0
+        self.index = index
         self.img_file = ""
         self.path = path
         with open(csv_file_read) as f:
-            self.csv_reader = csv.reader(f, delimiter=',', lineterminator='\n')
-            self.csv_reader.__next__()
+            csv_reader = csv.reader(f, delimiter=',', lineterminator='\n')
+            csv_reader.__next__()
+            self.detection = []
+            self.data = []
+            for row in csv_reader:
+                detection.append(row)
+            self.face_num = len(detection)
+        if os.path.isfile(csv_file_write):
+            with open(csv_file_write) as prev:
+                reader = csv.reader(prev, delimiter=',', lineterminator='\n')
+                next(reader)
+                for row in reader:
+                    data.append(row)
+        else:
             with open(csv_file_write,'w') as out:
                 self.csv_writer = csv.writer(out, delimiter=',', lineterminator='\n')
                 fieldnames=['dir_name','img_file','bound_left','bound_top','bound_right','bound_bot','pan','roll','tilt','anger','joy','sorrow','surprise','label']
@@ -61,15 +74,20 @@ class LabelingGUI:
                 self.nextFace()
                 self.root.mainloop()
 
-    def nextFace(self):
-        self.row = next(self.csv_reader, None)
-        row = self.row
-        if row is None:
-            self.root.quit()
-        else:
-            self.showFace(row)
+    def prevFace(self):
+        if self.index == 0:
+            return
+        self.index -= 1
+        self.showFace()
 
-    def showFace(self, row):
+    def nextFace(self):
+        if self.index >= self.face_num - 1:
+            self.root.quit()
+        self.index += 1
+        self.showFace()
+
+    def showFace(self):
+        row = self.detection[self.index]
         if self.img_file != row[1]:
             self.img_file = row[1]
             self.img_name.config(text = "Image: "+self.img_file)
@@ -115,20 +133,28 @@ def onKeyPress(event):
     print('You pressed '+str(pressed_char))
     if pressed_char == '1':
         # TODO : db write 
-        GUI.csv_writer.writerow(GUI.row + [0])
+        GUI.data.append(GUI.row + [1])
+        # GUI.csv_writer.writerow(GUI.row + [1])
         GUI.nextFace()
     if pressed_char == '2':
         # TODO : db write 
-        GUI.csv_writer.writerow(GUI.row + [1])
+        GUI.data.append(GUI.row + [2])
+        GUI.nextFace()
+    if pressed_char == '3':
+        # TODO : db write 
+        GUI.data.append(GUI.row + [3])
         GUI.nextFace()
     if pressed_char == 'q':
         # TODO : quit
+        GUI.csv_writer.writerow(GUI.data)
         GUI.root.quit()
+    if pressed_char == 'z':
+        GUI.data.pop(len(GUI.data)-1)
+        GUI.prevFace()
 
 def main():
     global GUI
-    dir_root = 'data_gopro/filtered/'
-    path = dir_root
+    path = '../../../Google\ Drive/Documents/Lectures/0_IntelligentUI/02\ Project/05_Dataset/'
     csv_file_read = 'detection_0900.csv'
     csv_file_write = 'detection_0900_labeled.csv'
     GUI = LabelingGUI()
