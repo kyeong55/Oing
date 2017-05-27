@@ -1,5 +1,6 @@
 # import io
 import csv 
+import sys
 
 import tkinter as tk
 from PIL import ImageTk, Image, ImageDraw
@@ -46,18 +47,23 @@ class LabelingGUI:
         self.face_tilt = tk.Label(self.frame2, pady=8, font=(None,12))
         self.face_tilt.pack(side=tk.TOP)
         
-    def start(self, path, csv_file, index=0):
+    def start(self, path, csv_file_read, csv_file_write, index=0):
         self.index = 0
         self.img_file = ""
         self.path = path
-        with open(csv_file) as f:
+        with open(csv_file_read) as f:
             self.csv_reader = csv.reader(f, delimiter=',', lineterminator='\n')
             self.csv_reader.__next__()
-            self.nextFace()
-            self.root.mainloop()
+            with open(csv_file_write,'w') as out:
+                self.csv_writer = csv.writer(out, delimiter=',', lineterminator='\n')
+                fieldnames=['dir_name','img_file','bound_left','bound_top','bound_right','bound_bot','pan','roll','tilt','anger','joy','sorrow','surprise','label']
+                self.csv_writer.writerow(fieldnames)
+                self.nextFace()
+                self.root.mainloop()
 
     def nextFace(self):
-        row = next(self.csv_reader, None)
+        self.row = next(self.csv_reader, None)
+        row = self.row
         if row is None:
             self.root.quit()
         else:
@@ -109,20 +115,24 @@ def onKeyPress(event):
     print('You pressed '+str(pressed_char))
     if pressed_char == '1':
         # TODO : db write 
+        GUI.csv_writer.writerow(GUI.row + [0])
         GUI.nextFace()
     if pressed_char == '2':
         # TODO : db write 
+        GUI.csv_writer.writerow(GUI.row + [1])
         GUI.nextFace()
     if pressed_char == 'q':
         # TODO : quit
+        GUI.root.quit()
 
 def main():
     global GUI
     dir_root = 'data_gopro/filtered/'
     path = dir_root
-    csv_file = 'detection_0900.csv'
+    csv_file_read = 'detection_0900.csv'
+    csv_file_write = 'detection_0900_labeled.csv'
     GUI = LabelingGUI()
-    GUI.start(path,csv_file)
+    GUI.start(path,csv_file_read,csv_file_write)
 
 if __name__ == '__main__':
     main()
