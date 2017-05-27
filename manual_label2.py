@@ -2,6 +2,7 @@
 import csv 
 import sys
 import os
+import time
 
 import tkinter as tk
 from PIL import ImageTk, Image, ImageDraw
@@ -48,31 +49,41 @@ class LabelingGUI:
         self.face_tilt = tk.Label(self.frame2, pady=8, font=(None,12))
         self.face_tilt.pack(side=tk.TOP)
         
-    def start(self, path, csv_file_read, csv_file_write, index=0):
-        self.index = index
+    def start(self, path, csv_file_read, csv_file_write):
+        self.index = 0
         self.img_file = ""
         self.path = path
+        self.csv_file_write = csv_file_write
         with open(csv_file_read) as f:
             csv_reader = csv.reader(f, delimiter=',', lineterminator='\n')
             csv_reader.__next__()
             self.detection = []
             self.data = []
             for row in csv_reader:
-                detection.append(row)
-            self.face_num = len(detection)
+                self.detection.append(row)
+            self.face_num = len(self.detection)
         if os.path.isfile(csv_file_write):
             with open(csv_file_write) as prev:
                 reader = csv.reader(prev, delimiter=',', lineterminator='\n')
                 next(reader)
                 for row in reader:
-                    data.append(row)
-        else:
-            with open(csv_file_write,'w') as out:
-                self.csv_writer = csv.writer(out, delimiter=',', lineterminator='\n')
-                fieldnames=['dir_name','img_file','bound_left','bound_top','bound_right','bound_bot','pan','roll','tilt','anger','joy','sorrow','surprise','label']
-                self.csv_writer.writerow(fieldnames)
-                self.nextFace()
-                self.root.mainloop()
+                    self.data.append(row)
+                    self.index +=1
+        
+        self.showFace()
+        self.root.mainloop()
+        # with open(csv_file_write,'w') as out:
+        #     self.csv_writer = csv.writer(out, delimiter=',', lineterminator='\n')
+        #     fieldnames=['dir_name','img_file','bound_left','bound_top','bound_right','bound_bot','pan','roll','tilt','anger','joy','sorrow','surprise','label']
+        #     self.csv_writer.writerow(fieldnames)
+            
+
+    def saveData(self):
+        with open(self.csv_file_write,'w') as out:
+            csv_writer = csv.writer(out, delimiter=',', lineterminator='\n')
+            fieldnames=['dir_name','img_file','bound_left','bound_top','bound_right','bound_bot','pan','roll','tilt','anger','joy','sorrow','surprise','label']
+            csv_writer.writerow(fieldnames)
+            csv_writer.writerows(self.data)
 
     def prevFace(self):
         if self.index == 0:
@@ -123,7 +134,7 @@ class LabelingGUI:
 
         self.cv2.create_image((self.face_frag_w - box_x)/2, (self.face_frag_h - box_y)/2, image=self.cropped_imgtk, anchor='nw')
 
-        # self.face_index.config(text='Index: '+str(i+1)+'/'+str(self.face_num))
+        self.face_index.config(text='Index: '+str(self.index+1)+'/'+str(self.face_num))
         self.face_pan.config(text="Face pan: "+row[6])
         self.face_roll.config(text="Face roll: "+row[7])
         self.face_tilt.config(text="Face tilt: "+row[8])
@@ -133,32 +144,35 @@ def onKeyPress(event):
     print('You pressed '+str(pressed_char))
     if pressed_char == '1':
         # TODO : db write 
-        GUI.data.append(GUI.row + [1])
+        GUI.data.append(GUI.detection[GUI.index] + [1])
         # GUI.csv_writer.writerow(GUI.row + [1])
         GUI.nextFace()
     if pressed_char == '2':
         # TODO : db write 
-        GUI.data.append(GUI.row + [2])
+        GUI.data.append(GUI.detection[GUI.index] + [2])
         GUI.nextFace()
     if pressed_char == '3':
         # TODO : db write 
-        GUI.data.append(GUI.row + [3])
+        GUI.data.append(GUI.detection[GUI.index] + [3])
         GUI.nextFace()
     if pressed_char == 'q':
         # TODO : quit
-        GUI.csv_writer.writerow(GUI.data)
         GUI.root.quit()
     if pressed_char == 'z':
         GUI.data.pop(len(GUI.data)-1)
         GUI.prevFace()
 
 def main():
+    start_time = time.time()
     global GUI
-    path = '../../../Google\ Drive/Documents/Lectures/0_IntelligentUI/02\ Project/05_Dataset/'
+    path = 'data_gopro/filtered/'
     csv_file_read = 'detection_0900.csv'
     csv_file_write = 'detection_0900_labeled.csv'
     GUI = LabelingGUI()
     GUI.start(path,csv_file_read,csv_file_write)
+    GUI.saveData()
+    s = int(time.time() - start_time)
+    print('The time you lost: {:02}:{:02}:{:02}'.format(s//3600, s%3600//60, s%60))
 
 if __name__ == '__main__':
     main()
