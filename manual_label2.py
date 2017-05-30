@@ -169,9 +169,10 @@ def main():
     start_time = time.time()
     global GUI
     path = 'data/'
+    csv_path = '../../../Google Drive/Documents/Lectures/0_IntelligentUI/02 Project/05_Dataset/csv_files/'
     file_name = 'detection_0900_tg'
-    csv_file_read = file_name + '.csv'
-    csv_file_write = file_name + '_labeled.csv'
+    csv_file_read = csv_path + file_name + '.csv'
+    csv_file_write = csv_path + file_name + '_labeled.csv'
     GUI = LabelingGUI()
     GUI.start(path,csv_file_read,csv_file_write)
     GUI.saveData()
