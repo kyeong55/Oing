@@ -8,7 +8,7 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import export_graphviz
 from sklearn.model_selection import GridSearchCV
-
+from sklearn.externals import joblib
 
 def load_data(csv_files):
 
@@ -96,8 +96,6 @@ def eval_model(model, test_X, test_Y):
     print("")
 
 # Cross Validation for all data
-
-
 def run(csv_files, model):
     print("Classify with", model.__name__, "\n")
 
@@ -123,8 +121,6 @@ def run(csv_files, model):
         cv_count += 1
 
 # Train / Test for data from different classes
-
-
 def run2(csv_files, model):
     print("Classify with", model.__name__, "\n")
 
@@ -145,8 +141,6 @@ def run2(csv_files, model):
         eval_model(model(train_X, train_Y), test_X, test_Y)
 
 # GridSearch to find best hyper parameters
-
-
 def run3(csv_files):
     X, Y = load_data(csv_files)
     clf = GridSearchCV(
@@ -195,6 +189,9 @@ def run4(csv_files):
     # print(clf)
     return clf
 
+def export_pickle(csv_files):
+    clf = run4(csv_files)
+    joblib.dump(clf, 'watching_classifier.pkl') 
 
 def main():
     path = 'labeled/'
@@ -207,7 +204,8 @@ def main():
     # run(csv_files, svc)
     # run2(csv_files, random_forest)
     # run3(csv_files)
-    run4(csv_files)
+    # run4(csv_files)
+    export_pickle(csv_files)
 
 
 if __name__ == '__main__':
